@@ -1,0 +1,200 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Library Management System Design System - Professional & Clean */
+
+@layer base {
+  :root {
+    /* Core Library Brand Colors */
+    --background: 210 20% 98%;
+    --foreground: 215 25% 12%;
+
+    /* Card & Surface Colors */
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 12%;
+
+    /* Interactive Elements */
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 12%;
+
+    /* Primary - Library Blue */
+    --primary: 215 85% 25%;
+    --primary-foreground: 0 0% 98%;
+    --primary-hover: 215 85% 30%;
+
+    /* Secondary - Warm Neutral */
+    --secondary: 215 15% 95%;
+    --secondary-foreground: 215 25% 20%;
+
+    /* Muted Elements */
+    --muted: 215 15% 96%;
+    --muted-foreground: 215 10% 50%;
+
+    /* Accent - Warm Library Gold */
+    --accent: 35 85% 65%;
+    --accent-foreground: 35 85% 15%;
+
+    /* Success - Available Books */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 98%;
+
+    /* Warning - Limited Availability */
+    --warning: 38 92% 50%;
+    --warning-foreground: 38 92% 10%;
+
+    /* Destructive Actions */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* Borders & Inputs */
+    --border: 215 20% 88%;
+    --input: 215 20% 94%;
+    --ring: 215 85% 25%;
+
+    /* Design System Tokens */
+    --radius: 0.75rem;
+    --shadow-elegant: 0 4px 20px -4px hsl(var(--primary) / 0.15);
+    --shadow-card: 0 2px 8px -2px hsl(var(--foreground) / 0.08);
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-hover)));
+    --gradient-accent: linear-gradient(135deg, hsl(var(--accent)), hsl(35 85% 70%));
+    
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    /* Dark Theme for Library System */
+    --background: 215 28% 8%;
+    --foreground: 215 15% 92%;
+
+    --card: 215 25% 12%;
+    --card-foreground: 215 15% 92%;
+
+    --popover: 215 25% 12%;
+    --popover-foreground: 215 15% 92%;
+
+    --primary: 215 85% 70%;
+    --primary-foreground: 215 25% 8%;
+    --primary-hover: 215 85% 75%;
+
+    --secondary: 215 20% 18%;
+    --secondary-foreground: 215 15% 85%;
+
+    --muted: 215 20% 15%;
+    --muted-foreground: 215 10% 65%;
+
+    --accent: 35 85% 60%;
+    --accent-foreground: 35 85% 10%;
+
+    --success: 142 76% 45%;
+    --success-foreground: 0 0% 98%;
+
+    --warning: 38 92% 55%;
+    --warning-foreground: 38 92% 5%;
+
+    --destructive: 0 75% 65%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 215 20% 20%;
+    --input: 215 20% 16%;
+    --ring: 215 85% 70%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  /* Typography Scale */
+  .heading-xl { @apply text-4xl font-bold tracking-tight; }
+  .heading-lg { @apply text-3xl font-semibold tracking-tight; }
+  .heading-md { @apply text-2xl font-semibold; }
+  .heading-sm { @apply text-xl font-medium; }
+  
+  /* Utility Classes */
+  .shadow-elegant { box-shadow: var(--shadow-elegant); }
+  .shadow-card { box-shadow: var(--shadow-card); }
+  .transition-smooth { transition: var(--transition-smooth); }
+}
+
+@layer components {
+  /* Button Variants */
+  .btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 
+           shadow-elegant transition-smooth;
+  }
+  
+  .btn-accent {
+    @apply bg-gradient-to-r from-accent to-accent/90 text-accent-foreground 
+           hover:from-accent/90 hover:to-accent/80 shadow-elegant transition-smooth;
+  }
+  
+  /* Table Styles */
+  .table-modern {
+    @apply w-full border-separate border-spacing-0 rounded-lg overflow-hidden 
+           shadow-card bg-card;
+  }
+  
+  .table-header {
+    @apply bg-muted/50 text-muted-foreground font-medium text-sm uppercase 
+           tracking-wide px-6 py-4 text-left border-b border-border;
+  }
+  
+  .table-cell {
+    @apply px-6 py-4 border-b border-border/50 text-card-foreground;
+  }
+  
+  /* Card Styles */
+  .card-modern {
+    @apply bg-card shadow-card rounded-lg border border-border/50 
+           hover:shadow-elegant transition-smooth;
+  }
+  
+  /* Status Indicators */
+  .status-available {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs 
+           font-medium bg-success/10 text-success border border-success/20;
+  }
+  
+  .status-limited {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs 
+           font-medium bg-warning/10 text-warning border border-warning/20;
+  }
+  
+  .status-unavailable {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs 
+           font-medium bg-destructive/10 text-destructive border border-destructive/20;
+  }
+}
