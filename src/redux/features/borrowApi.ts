@@ -4,6 +4,7 @@ const borrowApi = apiSlice.injectEndpoints({
   endpoints: (build) => ({
     borrowSummary: build.query({
       query: () => "/borrow",
+      providesTags: ["borrow"],
     }),
 
     //add book to database
@@ -13,6 +14,7 @@ const borrowApi = apiSlice.injectEndpoints({
         method: "POST",
         body: borrowBookDetails,
       }),
+      invalidatesTags: ["borrow"],
     }),
   }),
 });

@@ -17,7 +17,7 @@ import {
 import { useBorrowSummaryQuery } from "@/redux/features/borrowApi";
 
 const BorrowSummary = () => {
-  const { data, isLoading, isError, error } = useBorrowSummaryQuery();
+  const { data, isLoading, isError, error } = useBorrowSummaryQuery(undefined);
 
   const totalBorrowedBooks = data?.data?.reduce(
     (sum, book) => sum + book.totalQuantity,

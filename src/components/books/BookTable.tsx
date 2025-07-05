@@ -35,7 +35,7 @@ interface BookTableProps {
 
 export const BookTable = ({ showHeader = true, maxRows }: BookTableProps) => {
   const navigate = useNavigate();
-  const { data, isLoading, isError } = useGetBooksQuery();
+  const { data, isLoading, isError } = useGetBooksQuery(undefined);
   const [deleteBook] = useDeleteBookMutation();
   const books = data?.data || [];
 

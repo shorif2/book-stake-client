@@ -4,6 +4,7 @@ const booksApi = apiSlice.injectEndpoints({
   endpoints: (build) => ({
     getBooks: build.query({
       query: () => "/books",
+      providesTags: ["books"],
     }),
 
     // get single book with id
@@ -18,6 +19,7 @@ const booksApi = apiSlice.injectEndpoints({
         method: "POST",
         body: bookDetails,
       }),
+      invalidatesTags: ["books"],
     }),
 
     //update book
@@ -27,6 +29,7 @@ const booksApi = apiSlice.injectEndpoints({
         method: "PATCH",
         body: bookDetails,
       }),
+      invalidatesTags: ["books"],
     }),
 
     // delete single book
@@ -35,6 +38,7 @@ const booksApi = apiSlice.injectEndpoints({
         url: `/books/${bookId}`,
         method: "DELETE",
       }),
+      invalidatesTags: ["books"],
     }),
   }),
 });

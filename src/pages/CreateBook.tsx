@@ -40,9 +40,15 @@ const CreateBook = () => {
       const res = await addBook(formData);
       if (res?.data?.success) {
         toast.success(`${res?.data?.message}`);
-        navigate("/books");
+        if (document.startViewTransition) {
+          document.startViewTransition(() => navigate("/books"));
+        } else {
+          navigate("/books");
+        }
       } else if (!res?.data?.success) {
-        toast.error(`${res?.data?.message}`);
+        toast.error(`${res?.data?.message || res?.error?.data?.message}`);
+      } else {
+        toast.error(`Something went wrong`);
       }
     } catch (error) {
       toast.error(`Something went wrong : ${error?.message}`);

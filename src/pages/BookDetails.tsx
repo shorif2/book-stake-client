@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Book, Edit, BookOpen } from "lucide-react";
+import { ArrowLeft, Book, Edit, BookOpen, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,7 +15,11 @@ import { useGetSingleBooksQuery } from "@/redux/features/bookApi";
 const BookDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { data, isLoading, isError } = useGetSingleBooksQuery(id);
+  const { data, isLoading, isError } = useGetSingleBooksQuery(id, {
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
+    refetchOnReconnect: true,
+  });
   const book = data?.data || {};
 
   if (!book) {
@@ -36,7 +40,6 @@ const BookDetails = () => {
       </div>
     );
   }
-  console.log(book);
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
@@ -47,7 +50,7 @@ const BookDetails = () => {
           </Link>
         </Button>
       </div>
-
+      {}
       <div className="grid md:grid-cols-3 gap-8">
         {/* Book Cover */}
         <div className="md:col-span-1">
@@ -82,94 +85,107 @@ const BookDetails = () => {
         </div>
 
         {/* Book Details */}
+
         <div className="md:col-span-2 space-y-6">
-          <Card className="card-modern">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div>
-                  <CardTitle className="text-3xl mb-2">{book.title}</CardTitle>
-                  <CardDescription className="text-lg">
-                    by {book.author}
-                  </CardDescription>
-                </div>
-                <Badge
-                  variant={book.available > 0 ? "default" : "secondary"}
-                  className="ml-4"
-                >
-                  {book.available > 0
-                    ? `${book?.copies} available`
-                    : "Unavailable"}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-4">
+          {isLoading ? (
+            <>
+              <Card className="flex flex-col justify-center items-center gap-2 text-center h-[400px]">
+                {/* <Card className="card-modern"> */}
+                <LoaderCircle className="animate-spin text-primary text-3xl" />
+                Books Loading...
+              </Card>
+            </>
+          ) : (
+            <Card className="card-modern">
+              <CardHeader>
+                <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="font-semibold mb-2">Description</h3>
-                    <p className="text-muted-foreground">
-                      {book.description} <br />
-                      exploring themes of wealth, love, and the American Dream.
-                      Set in the summer of 1922, the story follows Nick Carraway
-                      as he observes the mysterious Jay Gatsby and his obsession
-                      with Daisy Buchanan.
-                    </p>
+                    <CardTitle className="text-3xl mb-2">
+                      {book.title}
+                    </CardTitle>
+                    <CardDescription className="text-lg">
+                      by {book.author}
+                    </CardDescription>
                   </div>
-                  <div>
-                    <h3 className="font-semibold mb-2">Genre</h3>
-                    <Badge variant="outline">{book.genre}</Badge>
-                  </div>
+                  <Badge
+                    variant={book.available > 0 ? "default" : "secondary"}
+                    className="ml-4"
+                  >
+                    {book.available > 0
+                      ? `${book?.copies} available`
+                      : "Unavailable"}
+                  </Badge>
                 </div>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
                     <div>
-                      <h4 className="font-medium text-sm text-muted-foreground">
-                        ISBN
-                      </h4>
-                      <p className="font-mono text-sm">{book.isbn}</p>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-sm text-muted-foreground">
-                        Published
-                      </h4>
-                      <p>
-                        {book?.createdAt &&
-                          new Date(book.createdAt).toLocaleString("en-US", {
-                            dateStyle: "medium",
-                          })}
+                      <h3 className="font-semibold mb-2">Description</h3>
+                      <p className="text-muted-foreground">
+                        {book.description} <br />
+                        exploring themes of wealth, love, and the American
+                        Dream. Set in the summer of 1922, the story follows Nick
+                        Carraway as he observes the mysterious Jay Gatsby and
+                        his obsession with Daisy Buchanan.
                       </p>
                     </div>
                     <div>
-                      <h4 className="font-medium text-sm text-muted-foreground">
-                        Pages
-                      </h4>
-                      <p>{book?.description?.length}</p>
+                      <h3 className="font-semibold mb-2">Genre</h3>
+                      <Badge variant="outline">{book.genre}</Badge>
                     </div>
-                    <div>
-                      <h4 className="font-medium text-sm text-muted-foreground">
-                        Language
-                      </h4>
-                      <p>English</p>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-sm text-muted-foreground">
-                        Total Copies
-                      </h4>
-                      <p>{book.copies}</p>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-sm text-muted-foreground">
-                        Rating
-                      </h4>
-                      <p className="flex items-center gap-1">
-                        ⭐ {book.copies}/5
-                      </p>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <h4 className="font-medium text-sm text-muted-foreground">
+                          ISBN
+                        </h4>
+                        <p className="font-mono text-sm">{book.isbn}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-sm text-muted-foreground">
+                          Published
+                        </h4>
+                        <p>
+                          {book?.createdAt &&
+                            new Date(book.createdAt).toLocaleString("en-US", {
+                              dateStyle: "medium",
+                            })}
+                        </p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-sm text-muted-foreground">
+                          Pages
+                        </h4>
+                        <p>{book?.description?.length}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-sm text-muted-foreground">
+                          Language
+                        </h4>
+                        <p>English</p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-sm text-muted-foreground">
+                          Total Copies
+                        </h4>
+                        <p>{book.copies}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-sm text-muted-foreground">
+                          Rating
+                        </h4>
+                        <p className="flex items-center gap-1">
+                          ⭐ {book.copies}/5
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
 
