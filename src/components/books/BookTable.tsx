@@ -1,12 +1,24 @@
-import { useState } from 'react';
-import { Edit, Trash2, BookOpen } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import { Edit, Trash2, BookOpen, LoaderCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  useDeleteBookMutation,
+  useGetBooksQuery,
+} from "@/redux/features/bookApi";
+import { toast } from "sonner";
 
 interface Book {
-  id: number;
+  _id: number;
   title: string;
   author: string;
   genre: string;
@@ -23,75 +35,52 @@ interface BookTableProps {
 
 export const BookTable = ({ showHeader = true, maxRows }: BookTableProps) => {
   const navigate = useNavigate();
-  // Mock data - TODO: Replace with actual API call
-  const [books] = useState<Book[]>([
-    {
-      id: 1,
-      title: 'The Great Gatsby',
-      author: 'F. Scott Fitzgerald',
-      genre: 'Classic Literature',
-      isbn: '978-0-7432-7356-5',
-      copies: 5,
-      available: 3,
-      description: 'A classic American novel set in the Jazz Age'
-    },
-    {
-      id: 2,
-      title: 'To Kill a Mockingbird',
-      author: 'Harper Lee',
-      genre: 'Fiction',
-      isbn: '978-0-06-112008-4',
-      copies: 3,
-      available: 1,
-      description: 'A gripping tale of racial injustice and childhood innocence'
-    },
-    {
-      id: 3,
-      title: '1984',
-      author: 'George Orwell',
-      genre: 'Dystopian Fiction',
-      isbn: '978-0-452-28423-4',
-      copies: 4,
-      available: 0,
-      description: 'A dystopian social science fiction novel'
-    },
-    {
-      id: 4,
-      title: 'Pride and Prejudice',
-      author: 'Jane Austen',
-      genre: 'Romance',
-      isbn: '978-0-14-143951-8',
-      copies: 2,
-      available: 2,
-      description: 'A romantic novel of manners'
-    },
-    {
-      id: 5,
-      title: 'The Catcher in the Rye',
-      author: 'J.D. Salinger',
-      genre: 'Coming-of-age',
-      isbn: '978-0-316-76948-0',
-      copies: 3,
-      available: 1,
-      description: 'A controversial coming-of-age story'
-    }
-  ]);
+  const { data, isLoading, isError } = useGetBooksQuery();
+  const [deleteBook] = useDeleteBookMutation();
+  const books = data?.data || [];
 
-  const handleDelete = (id: number) => {
-    // TODO: Implement delete functionality
-    console.log('Delete book:', id);
+  const handleDelete = async (bookId: string) => {
+    toast("Are you sure about to delete", {
+      action: {
+        label: "Delete",
+        onClick: async () => {
+          try {
+            const res = await deleteBook(bookId);
+            if (res?.data?.success) {
+              toast.success(`${res?.data?.message}`);
+            } else {
+              toast.error(`${res?.error?.data?.message}`);
+            }
+          } catch (error) {
+            toast.error(`Something went wrong. Error: ${error?.message}`);
+          }
+        },
+      },
+    });
   };
 
-  const handleBorrow = (id: number) => {
+  const handleBorrow = (id: string) => {
     navigate(`/borrow/${id}`);
   };
 
-  const handleEdit = (id: number) => {
+  const handleEdit = (id: string) => {
     navigate(`/edit-book/${id}`);
   };
-
   const displayBooks = maxRows ? books.slice(0, maxRows) : books;
 
+  if (isError)
+    return (
+      <div className="flex flex-col justify-center items-center gap-2 text-center">
+        Something went wrong. please try again...
+      </div>
+    );
+  if (isLoading)
+    return (
+      <div className="flex flex-col justify-center items-center gap-2 text-center">
+        <LoaderCircle className="animate-spin text-primary text-3xl" />
+        Books Loading...
+      </div>
+    );
   return (
     <Table>
       {showHeader && (
@@ -108,48 +97,54 @@ export const BookTable = ({ showHeader = true, maxRows }: BookTableProps) => {
         </TableHeader>
       )}
       <TableBody>
-        {displayBooks.map((book) => (
-          <TableRow key={book.id}>
-              <TableCell className="font-medium">
-                <Link 
-                  to={`/books/${book.id}`}
-                  className="hover:text-primary hover:underline transition-colors"
-                >
-                  {book.title}
-                </Link>
-              </TableCell>
+        {displayBooks?.map((book) => (
+          <TableRow key={book._id}>
+            <TableCell className="font-medium">
+              <Link
+                to={`/books/${book._id}`}
+                className="hover:text-primary hover:underline transition-colors"
+              >
+                {book.title}
+              </Link>
+            </TableCell>
             <TableCell>{book.author}</TableCell>
             <TableCell className="hidden lg:table-cell">{book.genre}</TableCell>
-            <TableCell className="hidden md:table-cell text-muted-foreground">{book.isbn}</TableCell>
-            <TableCell className="hidden sm:table-cell">{book.copies}</TableCell>
+            <TableCell className="hidden md:table-cell text-muted-foreground">
+              {book.isbn}
+            </TableCell>
+            <TableCell className="hidden sm:table-cell">
+              {book.copies}
+            </TableCell>
             <TableCell>
               <Badge variant={book.available > 0 ? "default" : "secondary"}>
-                {book.available > 0 ? `${book.available} available` : 'Unavailable'}
+                {book.available > 0
+                  ? `${book.copies} available`
+                  : "Unavailable"}
               </Badge>
             </TableCell>
             <TableCell className="text-right">
               <div className="flex justify-end gap-1">
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   size="icon"
-                  onClick={() => handleEdit(book.id)}
+                  onClick={() => handleEdit(book._id)}
                   className="h-8 w-8"
                 >
                   <Edit className="h-3 w-3" />
                 </Button>
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   size="icon"
-                  onClick={() => handleBorrow(book.id)}
-                  disabled={book.available === 0}
+                  onClick={() => handleBorrow(book._id)}
+                  disabled={book.copies === 0}
                   className="h-8 w-8"
                 >
                   <BookOpen className="h-3 w-3" />
                 </Button>
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   size="icon"
-                  onClick={() => handleDelete(book.id)}
+                  onClick={() => handleDelete(book._id)}
                   className="h-8 w-8"
                 >
                   <Trash2 className="h-3 w-3" />

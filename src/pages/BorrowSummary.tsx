@@ -1,17 +1,43 @@
-import { BarChart3, Book } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { BarChart3, Book, LoaderCircle } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useBorrowSummaryQuery } from "@/redux/features/borrowApi";
 
 const BorrowSummary = () => {
-  // Mock data - TODO: Replace with actual API call
-  const borrowSummary = [
-    { title: 'The Great Gatsby', isbn: '978-0-7432-7356-5', totalBorrowed: 5 },
-    { title: 'To Kill a Mockingbird', isbn: '978-0-06-112008-4', totalBorrowed: 3 },
-    { title: '1984', isbn: '978-0-452-28423-4', totalBorrowed: 7 },
-    { title: 'Pride and Prejudice', isbn: '978-0-14-143951-8', totalBorrowed: 2 },
-  ];
+  const { data, isLoading, isError, error } = useBorrowSummaryQuery();
 
-  const totalBorrowedBooks = borrowSummary.reduce((sum, book) => sum + book.totalBorrowed, 0);
+  const totalBorrowedBooks = data?.data?.reduce(
+    (sum, book) => sum + book.totalQuantity,
+    0
+  );
+
+  if (isError)
+    return (
+      <div className="flex flex-col justify-center items-center gap-2 text-center">
+        Something went wrong. please try again... Error: {error?.message}
+      </div>
+    );
+
+  if (isLoading)
+    return (
+      <div className="flex flex-col justify-center items-center gap-2 text-center">
+        <LoaderCircle className="animate-spin text-accent text-3xl" />
+        Borrow Summary Loading...
+      </div>
+    );
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -28,7 +54,9 @@ const BorrowSummary = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-primary">{totalBorrowedBooks}</div>
+            <div className="text-2xl font-bold text-primary">
+              {totalBorrowedBooks}
+            </div>
           </CardContent>
         </Card>
 
@@ -39,7 +67,9 @@ const BorrowSummary = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-accent">{borrowSummary.length}</div>
+            <div className="text-2xl font-bold text-accent">
+              {data?.data?.length}
+            </div>
           </CardContent>
         </Card>
 
@@ -51,7 +81,9 @@ const BorrowSummary = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-success">
-              {borrowSummary.length > 0 ? (totalBorrowedBooks / borrowSummary.length).toFixed(1) : '0'}
+              {data?.data?.length > 0
+                ? (totalBorrowedBooks / data?.data?.length).toFixed(1)
+                : "0"}
             </div>
           </CardContent>
         </Card>
@@ -73,21 +105,32 @@ const BorrowSummary = () => {
               <TableRow>
                 <TableHead>Book Title</TableHead>
                 <TableHead>ISBN</TableHead>
-                <TableHead className="text-right">Total Quantity Borrowed</TableHead>
+                <TableHead className="text-right">
+                  Total Quantity Borrowed
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {borrowSummary.length > 0 ? (
-                borrowSummary.map((book, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium">{book.title}</TableCell>
-                    <TableCell className="text-muted-foreground">{book.isbn}</TableCell>
-                    <TableCell className="text-right font-semibold">{book.totalBorrowed}</TableCell>
+              {data?.data.length > 0 ? (
+                data?.data?.map((book) => (
+                  <TableRow key={book?.book?.isbn}>
+                    <TableCell className="font-medium">
+                      {book?.book?.title}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {book?.book?.isbn}
+                    </TableCell>
+                    <TableCell className="text-right font-semibold">
+                      {book?.totalQuantity}
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
+                  <TableCell
+                    colSpan={3}
+                    className="text-center py-8 text-muted-foreground"
+                  >
                     No books have been borrowed yet
                   </TableCell>
                 </TableRow>

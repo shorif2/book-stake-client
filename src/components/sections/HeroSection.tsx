@@ -73,7 +73,7 @@ export const HeroSection = () => {
               className="flex items-center gap-2"
               asChild
             >
-              <Link to="/books">
+              <Link to="/borrow-summary">
                 <BarChart3 className="h-5 w-5" />
                 View Analytics
               </Link>

@@ -1,60 +1,44 @@
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, BookOpen, Calendar, User } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
-import { useState } from 'react';
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, BookOpen, Calendar, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { useGetSingleBooksQuery } from "@/redux/features/bookApi";
+import { useBorrowBooksMutation } from "@/redux/features/borrowApi";
+import { toast } from "sonner";
 
 // Mock data - in a real app, this would come from an API
-const mockBooks = [
-  {
-    id: 1,
-    title: 'The Great Gatsby',
-    author: 'F. Scott Fitzgerald',
-    genre: 'Classic Literature',
-    available: 3
-  },
-  {
-    id: 2,
-    title: 'To Kill a Mockingbird',
-    author: 'Harper Lee',
-    genre: 'Fiction',
-    available: 1
-  },
-  {
-    id: 3,
-    title: '1984',
-    author: 'George Orwell',
-    genre: 'Dystopian Fiction',
-    available: 0
-  }
-];
 
 const BorrowBook = () => {
   const { bookId } = useParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
-  
-  const book = mockBooks.find(b => b.id === parseInt(bookId || '0'));
-  
+  const { data, isLoading, isError } = useGetSingleBooksQuery(bookId);
+  const [borrowBook, { isLoading: isBorrowing }] = useBorrowBooksMutation();
+  const book = data?.data || {};
+
   const [formData, setFormData] = useState({
-    borrowerName: '',
-    borrowerEmail: '',
-    borrowerPhone: '',
-    returnDate: '',
-    notes: ''
+    borrowerName: "",
+    borrowerEmail: "",
+    quantity: "",
+    dueDate: "",
   });
 
   // Set default return date to 2 weeks from now
   useState(() => {
     const defaultReturnDate = new Date();
     defaultReturnDate.setDate(defaultReturnDate.getDate() + 14);
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      returnDate: defaultReturnDate.toISOString().split('T')[0]
+      dueDate: defaultReturnDate.toISOString().split("T")[0],
     }));
   });
 
@@ -65,7 +49,9 @@ const BorrowBook = () => {
           <CardContent className="p-8 text-center">
             <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
             <h2 className="text-2xl font-bold mb-2">Book Not Found</h2>
-            <p className="text-muted-foreground mb-4">The book you're trying to borrow doesn't exist.</p>
+            <p className="text-muted-foreground mb-4">
+              The book you're trying to borrow doesn't exist.
+            </p>
             <Button asChild>
               <Link to="/books">Back to Books</Link>
             </Button>
@@ -82,7 +68,9 @@ const BorrowBook = () => {
           <CardContent className="p-8 text-center">
             <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
             <h2 className="text-2xl font-bold mb-2">Book Unavailable</h2>
-            <p className="text-muted-foreground mb-4">"{book.title}" is currently not available for borrowing.</p>
+            <p className="text-muted-foreground mb-4">
+              "{book.title}" is currently not available for borrowing.
+            </p>
             <div className="flex gap-4 justify-center">
               <Button asChild>
                 <Link to="/books">Browse Other Books</Link>
@@ -99,24 +87,29 @@ const BorrowBook = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      toast({
-        title: "Book Borrowed Successfully",
-        description: `"${book.title}" has been borrowed by ${formData.borrowerName}. Return date: ${new Date(formData.returnDate).toLocaleDateString()}`,
-      });
-      navigate('/borrow-summary');
-    }, 1000);
+    try {
+      const borrowInfo = { ...formData, book: book._id };
+      const res = await borrowBook(borrowInfo);
+      if (res?.data?.success) {
+        toast.success(
+          `"${book.title}" has been borrowed by ${
+            formData.borrowerName
+          }. Return date: ${new Date(formData.dueDate).toLocaleDateString()}`
+        );
+        navigate("/borrow-summary");
+      }
+    } catch (error) {
+      toast.error(`Something went wrong ${error?.message}`);
+    }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -124,7 +117,7 @@ const BorrowBook = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
         <Button variant="ghost" asChild>
-          <Link to={`/books/${book.id}`} className="flex items-center gap-2">
+          <Link to={`/books/${book._id}`} className="flex items-center gap-2">
             <ArrowLeft className="h-4 w-4" />
             Back to Book Details
           </Link>
@@ -144,10 +137,12 @@ const BorrowBook = () => {
               </div>
               <div className="space-y-2">
                 <h3 className="font-semibold">{book.title}</h3>
-                <p className="text-sm text-muted-foreground">by {book.author}</p>
+                <p className="text-sm text-muted-foreground">
+                  by {book.author}
+                </p>
                 <p className="text-sm text-muted-foreground">{book.genre}</p>
                 <p className="text-sm font-medium text-success">
-                  {book.available} copies available
+                  {book.copies} copies available
                 </p>
               </div>
             </CardContent>
@@ -189,7 +184,7 @@ const BorrowBook = () => {
                       id="borrowerEmail"
                       name="borrowerEmail"
                       type="email"
-                      value={formData.borrowerEmail}
+                      value={formData?.borrowerEmail}
                       onChange={handleChange}
                       placeholder="Enter your email"
                       required
@@ -199,29 +194,31 @@ const BorrowBook = () => {
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="borrowerPhone">Phone Number</Label>
+                    <Label htmlFor="quantity">Quantity</Label>
                     <Input
-                      id="borrowerPhone"
-                      name="borrowerPhone"
-                      type="tel"
-                      value={formData.borrowerPhone}
+                      id="quantity"
+                      name="quantity"
+                      type="number"
+                      min={1}
+                      max={book.copies}
+                      value={formData.quantity}
                       onChange={handleChange}
-                      placeholder="Enter your phone number"
+                      placeholder="Enter your borrow quantity"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="returnDate">
+                    <Label htmlFor="dueDate">
                       <Calendar className="h-4 w-4 inline mr-2" />
                       Expected Return Date
                     </Label>
                     <Input
-                      id="returnDate"
-                      name="returnDate"
+                      id="dueDate"
+                      name="dueDate"
                       type="date"
-                      value={formData.returnDate}
+                      value={formData.dueDate}
                       onChange={handleChange}
-                      min={new Date().toISOString().split('T')[0]}
+                      min={new Date().toISOString().split("T")[0]}
                       required
                     />
                   </div>
@@ -243,10 +240,10 @@ const BorrowBook = () => {
                 <div className="flex gap-4">
                   <Button type="submit" disabled={isLoading} className="flex-1">
                     <BookOpen className="h-4 w-4 mr-2" />
-                    {isLoading ? 'Processing...' : 'Confirm Borrow'}
+                    {isBorrowing ? "Processing..." : "Confirm Borrow"}
                   </Button>
                   <Button variant="outline" type="button" asChild>
-                    <Link to={`/books/${book.id}`}>Cancel</Link>
+                    <Link to={`/books/${book._id}`}>Cancel</Link>
                   </Button>
                 </div>
               </form>

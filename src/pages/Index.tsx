@@ -8,11 +8,8 @@ import { BookTable } from "@/components/books/BookTable";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
 
 const Index = () => {
-  const state = useSelector((state) => state.books);
-  console.log(state);
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}

@@ -1,35 +1,61 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Book, ArrowLeft } from 'lucide-react';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Book, ArrowLeft, LoaderCircle } from "lucide-react";
+import { useAddBookMutation } from "@/redux/features/bookApi";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
 
 const CreateBook = () => {
   const navigate = useNavigate();
+  const [addBook, { isLoading, isSuccess }] = useAddBookMutation();
   const [formData, setFormData] = useState({
-    title: '',
-    author: '',
-    genre: '',
-    isbn: '',
-    description: '',
+    title: "",
+    author: "",
+    genre: "",
+    isbn: "",
+    description: "",
     copies: 1,
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Add API call to create book
-    console.log('Creating book:', formData);
-    navigate('/books');
+    try {
+      const res = await addBook(formData);
+      if (res?.data?.success) {
+        toast.success(`${res?.data?.message}`);
+        navigate("/books");
+      } else if (!res?.data?.success) {
+        toast.error(`${res?.data?.message}`);
+      }
+    } catch (error) {
+      toast.error(`Something went wrong : ${error?.message}`);
+    }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target || {};
+    setFormData((prev) => ({
       ...prev,
-      [name]: name === 'copies' ? parseInt(value) || 0 : value
+      [name]: name === "copies" ? parseInt(value) || 0 : value,
     }));
   };
 
@@ -82,18 +108,37 @@ const CreateBook = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="genre">Genre</Label>
-                  <Input
-                    id="genre"
+                  <Select
                     name="genre"
                     value={formData.genre}
-                    onChange={handleChange}
-                  />
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        genre: value,
+                      }))
+                    }
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="FICTION">FICTION</SelectItem>
+                      <SelectItem value="NON_FICTION">NON_FICTION</SelectItem>
+                      <SelectItem value="SCIENCE">SCIENCE</SelectItem>
+                      <SelectItem value="HISTORY">HISTORY</SelectItem>
+                      <SelectItem value="BIOGRAPHY">BIOGRAPHY</SelectItem>
+                      <SelectItem value="FANTASY">FANTASY</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="isbn">ISBN</Label>
                   <Input
                     id="isbn"
                     name="isbn"
+                    required
                     value={formData.isbn}
                     onChange={handleChange}
                   />
@@ -105,6 +150,7 @@ const CreateBook = () => {
                 <Textarea
                   id="description"
                   name="description"
+                  required
                   value={formData.description}
                   onChange={handleChange}
                   rows={4}
@@ -117,6 +163,7 @@ const CreateBook = () => {
                   id="copies"
                   name="copies"
                   type="number"
+                  required
                   min="1"
                   value={formData.copies}
                   onChange={handleChange}
@@ -124,10 +171,22 @@ const CreateBook = () => {
               </div>
 
               <div className="flex gap-4">
-                <Button type="submit" className="flex-1">
-                  Add Book
+                <Button type="submit" disabled={isLoading} className="flex-1">
+                  {isLoading ? (
+                    <>
+                      <LoaderCircle className="animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>Add Book +</>
+                  )}
                 </Button>
-                <Button type="button" variant="outline" onClick={() => navigate(-1)}>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => navigate(-1)}
+                >
                   Cancel
                 </Button>
               </div>

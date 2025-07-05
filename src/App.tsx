@@ -18,7 +18,7 @@ const App = () => (
   <Provider store={store}>
     <TooltipProvider>
       <Toaster />
-      <Sonner />
+      <Sonner position="top-right" richColors />
       <BrowserRouter>
         <Layout>
           <Routes>

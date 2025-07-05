@@ -1,19 +1,19 @@
-import { Link, useLocation } from 'react-router-dom';
-import { Book, Plus, BarChart3 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Link, useLocation } from "react-router-dom";
+import { Book, Plus, BarChart3 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export const Navbar = () => {
   const location = useLocation();
-  
+
   const navItems = [
-    { path: '/', label: 'All Books', icon: Book },
-    { path: '/create-book', label: 'Add Book', icon: Plus },
-    { path: '/borrow-summary', label: 'Borrow Summary', icon: BarChart3 },
+    { path: "/books", label: "All Books", icon: Book },
+    { path: "/create-book", label: "Add Book", icon: Plus },
+    { path: "/borrow-summary", label: "Borrow Summary", icon: BarChart3 },
   ];
 
   const isActive = (path: string) => {
-    if (path === '/') {
-      return location.pathname === '/';
+    if (path === "/") {
+      return location.pathname === "/";
     }
     return location.pathname.startsWith(path);
   };
