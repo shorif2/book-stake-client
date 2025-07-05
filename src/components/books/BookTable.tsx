@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Edit, Trash2, BookOpen, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -74,6 +73,7 @@ export const BookTable = ({ showHeader = true, maxRows }: BookTableProps) => {
         Something went wrong. please try again...
       </div>
     );
+
   if (isLoading)
     return (
       <div className="flex flex-col justify-center items-center gap-2 text-center">
@@ -81,6 +81,7 @@ export const BookTable = ({ showHeader = true, maxRows }: BookTableProps) => {
         Books Loading...
       </div>
     );
+
   return (
     <Table>
       {showHeader && (

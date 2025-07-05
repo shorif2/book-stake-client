@@ -1,4 +1,4 @@
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, Book, Edit, BookOpen, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,14 +14,19 @@ import { useGetSingleBooksQuery } from "@/redux/features/bookApi";
 
 const BookDetails = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
-  const { data, isLoading, isError } = useGetSingleBooksQuery(id, {
+  const { data, isLoading, isError, error } = useGetSingleBooksQuery(id, {
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
     refetchOnReconnect: true,
   });
   const book = data?.data || {};
 
+  if (isError)
+    return (
+      <div className="flex flex-col justify-center items-center gap-2 text-center">
+        Something went wrong. please try again... Error: {error?.message}
+      </div>
+    );
   if (!book) {
     return (
       <div className="container mx-auto px-4 py-8">

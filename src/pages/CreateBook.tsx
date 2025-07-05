@@ -21,11 +21,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
+import type { SerializedError } from "@reduxjs/toolkit";
+import { CreateBookFormData } from "@/lib/types";
 
 const CreateBook = () => {
   const navigate = useNavigate();
   const [addBook, { isLoading, isSuccess }] = useAddBookMutation();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CreateBookFormData>({
     title: "",
     author: "",
     genre: "",
@@ -38,20 +41,38 @@ const CreateBook = () => {
     e.preventDefault();
     try {
       const res = await addBook(formData);
-      if (res?.data?.success) {
-        toast.success(`${res?.data?.message}`);
+      if ("data" in res && res.data?.success) {
+        toast.success(`${res.data.message}`);
         if (document.startViewTransition) {
           document.startViewTransition(() => navigate("/books"));
         } else {
           navigate("/books");
         }
-      } else if (!res?.data?.success) {
-        toast.error(`${res?.data?.message || res?.error?.data?.message}`);
+      } else if ("error" in res) {
+        const error = res.error as FetchBaseQueryError | SerializedError;
+        if (
+          "data" in error &&
+          typeof error.data === "object" &&
+          error.data !== null &&
+          "message" in error.data
+        ) {
+          toast.error(`${(error.data as { message?: string }).message}`);
+        } else if ("message" in error) {
+          toast.error(`${error.message}`);
+        } else {
+          toast.error("Something went wrong");
+        }
       } else {
-        toast.error(`Something went wrong`);
+        toast.error("Something went wrong");
       }
-    } catch (error) {
-      toast.error(`Something went wrong : ${error?.message}`);
+    } catch (error: unknown) {
+      if (error && typeof error === "object" && "message" in error) {
+        toast.error(
+          `Something went wrong : ${(error as { message?: string }).message}`
+        );
+      } else {
+        toast.error("Something went wrong");
+      }
     }
   };
 

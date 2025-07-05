@@ -10,13 +10,11 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { useGetSingleBooksQuery } from "@/redux/features/bookApi";
 import { useBorrowBooksMutation } from "@/redux/features/borrowApi";
 import { toast } from "sonner";
-
-// Mock data - in a real app, this would come from an API
+import { BorrowFormData } from "@/lib/types";
 
 const BorrowBook = () => {
   const { bookId } = useParams();
@@ -25,11 +23,12 @@ const BorrowBook = () => {
   const [borrowBook, { isLoading: isBorrowing }] = useBorrowBooksMutation();
   const book = data?.data || {};
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<BorrowFormData>({
     borrowerName: "",
     borrowerEmail: "",
     quantity: "",
     dueDate: "",
+    notes: "",
   });
 
   // Set default return date to 2 weeks from now

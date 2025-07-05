@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Save, Book, LoaderCircle } from "lucide-react";
+import { ArrowLeft, Save, Book as BookIcon, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,7 +11,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import {
   useGetSingleBooksQuery,
@@ -26,22 +25,26 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import type { Book } from "@/lib/types";
 
 const EditBook = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  // const { toast } = useToast();
-  const { data, isLoading, isError } = useGetSingleBooksQuery(id);
+  const { data, isLoading, isError } = useGetSingleBooksQuery(id) as {
+    data?: { data: Book };
+    isLoading: boolean;
+    isError: boolean;
+  };
   const [updateBook, { isLoading: isUpdating }] = useUpdateBookMutation();
-  const defaultFormData = {
+  const defaultFormData: Book = {
     title: "",
     author: "",
     genre: "",
     isbn: "",
-    copies: 0,
+    copies: 1,
     description: "",
   };
-  const [formData, setFormData] = useState(data || defaultFormData);
+  const [formData, setFormData] = useState<Book>(defaultFormData);
 
   useEffect(() => {
     if (data) {
@@ -49,21 +52,25 @@ const EditBook = () => {
     }
   }, [data]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       const res = await updateBook({
         bookId: data?.data._id,
         bookDetails: formData,
-      });
+      } as { bookId: string; bookDetails: Book });
       if (res?.data?.success) {
         toast.success(`${formData.title}" has been successfully updated.`);
         navigate(`/books/${data?.data._id}`);
       } else if (!res?.data?.success) {
         toast.error(`${res?.data?.message}`);
       }
-    } catch (error) {
-      toast.error(`Something went wrong : ${error?.message}`);
+    } catch (error: unknown) {
+      let message = "Unknown error";
+      if (error && typeof error === "object" && "message" in error) {
+        message = (error as { message: string }).message;
+      }
+      toast.error(`Something went wrong : ${message}`);
     }
   };
 
@@ -161,7 +168,7 @@ const EditBook = () => {
       <div className="container mx-auto px-4 py-8">
         <Card>
           <CardContent className="p-8 text-center">
-            <Book className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+            <BookIcon className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
             <h2 className="text-2xl font-bold mb-2">Book Not Found</h2>
             <p className="text-muted-foreground mb-4">
               The book you're trying to edit doesn't exist.
@@ -189,7 +196,7 @@ const EditBook = () => {
       <Card className="card-modern">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Book className="h-6 w-6 text-primary" />
+            <BookIcon className="h-6 w-6 text-primary" />
             Edit Book
           </CardTitle>
           <CardDescription>

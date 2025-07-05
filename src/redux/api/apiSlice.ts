@@ -6,5 +6,6 @@ export const apiSlice = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: "https://bookstack-server.vercel.app/api",
   }),
+  tagTypes: ["books", "borrow"],
   endpoints: () => ({}),
 });
