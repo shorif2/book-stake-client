@@ -1,22 +1,28 @@
-# Book Stake Client
+# Book Stack Client
 
-A modern, full-featured book library management system built with React and Tailwind CSS.
+A modern, full-featured book library management system built with React, TypeScript, Redux Toolkit, and Tailwind CSS.
 
 ## Features
 
-- Browse, search, and filter books
-- View book details and categories
-- Borrow and return books
+- Browse books, view detailed book information and categories
+- Add, edit, and delete books
+- Borrow and return books with summary analytics
 - Featured authors and testimonials
-- Newsletter subscription
 - Responsive, clean UI with Tailwind CSS
+- Real-time updates with RTK Query
+- Error handling and loading states
+- Modern, accessible design
 
-## Getting Started
+## Technologies Used
 
-### Prerequisites
-
-- Node.js (v16+ recommended)
-- npm (v8+ recommended)
+- **React** (with TypeScript) — UI library for building interactive interfaces
+- **Redux Toolkit** & **RTK Query** — State management and data fetching
+- **React Router DOM** — Client-side routing
+- **Tailwind CSS** — Utility-first CSS framework for styling
+- **Radix UI** — Accessible UI primitives
+- **Lucide React** — Icon library
+- **Sonner** — Toast notifications
+- **Vite** — Fast build tool and development server
 
 ### Installation
 
@@ -36,14 +42,13 @@ npm run dev
 npm run build
 ```
 
-## Contributing
+## Main Pages & Navigation
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/YourFeature`)
-3. Commit your changes (`git commit -m 'Add some feature'`)
-4. Push to the branch (`git push origin feature/YourFeature`)
-5. Open a pull request
-
-## License
-
-[MIT](LICENSE)
+- `/` — Home (Hero, Featured Books, Categories, Authors, Newsletter, Testimonials, Stats)
+- `/books` — All Books (table view, manage collection)
+- `/books/:id` — Book Details (view, borrow, edit)
+- `/create-book` — Add a new book
+- `/edit-book/:id` — Edit book details
+- `/borrow/:bookId` — Borrow a book
+- `/borrow-summary` — Borrowed books analytics
+- `*` — 404 Not Found
